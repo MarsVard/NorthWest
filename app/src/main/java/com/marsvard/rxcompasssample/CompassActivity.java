@@ -41,8 +41,9 @@ public class CompassActivity extends AppCompatActivity {
                 });
     }
 
-
-
-
-
+    @Override
+    protected void onDestroy() {
+        northWest.dispose();
+        super.onDestroy();
+    }
 }
