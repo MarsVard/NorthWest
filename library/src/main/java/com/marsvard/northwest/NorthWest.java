@@ -13,11 +13,6 @@ import android.util.Log;
 import rx.Observable;
 import rx.subjects.PublishSubject;
 
-
-/**
- * Created by Mars on 21/10/2016.
- */
-
 public class NorthWest implements SensorEventListener {
     private final String TAG = NorthWest.class.getSimpleName();
     private final PublishSubject<Double> subject;
