@@ -21,14 +21,12 @@ public class CompassActivity extends AppCompatActivity {
         setContentView(R.layout.activity_compass);
 
         degreesTextView = (TextView) findViewById(R.id.degrees);
-        northWest = new NorthWest(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        rxCompassSubscription = northWest
-                .getObservable()
+        rxCompassSubscription = NorthWest.create(this)
                 .subscribe(new Subscriber<Double>() {
                     @Override
                     public void onCompleted() {
