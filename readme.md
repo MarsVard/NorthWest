@@ -9,8 +9,8 @@ This library also takes in consideration the magnetic field declination if your 
         // initialize NorthWest with a context
         northWest = new NorthWest(this);
         
-        // start listening for updates
-        northWest
+        // start listening for updates when activity onResume is called
+        rxCompasSubscription = northWest
                 .getObservable()
                 .subscribe(new Subscriber<Double>() {
                     @Override
@@ -29,8 +29,8 @@ This library also takes in consideration the magnetic field declination if your 
                     }
                 });
                 
-          // dispose when activity onStop is called
-          northWest.dispose();
+          // dispose when activity onPause is called
+          rxCompasSubscription.unsubscribe();
 
 ### Import library
 Step 1. Add the JitPack repository to your build file
