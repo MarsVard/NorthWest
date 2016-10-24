@@ -55,7 +55,6 @@ public class NorthWest implements SensorEventListener {
         float[] mTruncatedRotationVector = new float[4];
 
         if (event.values.length > 4) {
-            Log.d(TAG, "Sensor vector > 4");
             // On some Samsung devices, an exception is thrown if this vector > 4 (see #39)
             // Truncate the array, since we only care about the first 4 values anyway
             System.arraycopy(event.values, 0, mTruncatedRotationVector, 0, 4);
