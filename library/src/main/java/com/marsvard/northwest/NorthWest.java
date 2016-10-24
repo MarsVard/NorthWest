@@ -42,7 +42,7 @@ public class NorthWest {
         }
     }
 
-    private double calculateAngle(SensorEvent event) {
+    double calculateAngle(SensorEvent event) {
         // calculate degrees to north
         float[] mRotationMatrix = new float[16];
         float[] mTruncatedRotationVector = new float[4];
@@ -72,7 +72,6 @@ public class NorthWest {
         return angle;
     }
 
-
     public Observable<Double> getObservable() {
         return Observable.create(new Observable.OnSubscribe<Double>() {
             @Override
@@ -81,7 +80,9 @@ public class NorthWest {
                 final SensorEventListener sensorListener = new SensorEventListener() {
                     @Override
                     public void onSensorChanged(SensorEvent event) {
-                        subscriber.onNext(calculateAngle(event));
+                        if (!subscriber.isUnsubscribed()) {
+                            subscriber.onNext(calculateAngle(event));
+                        }
                     }
 
                     @Override
