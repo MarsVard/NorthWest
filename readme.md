@@ -45,5 +45,5 @@ Add this in your root build.gradle at the end of repositories:
 Step 2. Add the dependency
 
 		dependencies {
-		        compile 'com.github.MarsVard:NorthWest:1.0.1'
+		        compile 'com.github.MarsVard:NorthWest:1.0.2'
 		}
