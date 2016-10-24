@@ -11,11 +11,12 @@ import android.location.LocationManager;
 import android.util.Log;
 
 import rx.Observable;
-import rx.subjects.PublishSubject;
+import rx.Subscriber;
+import rx.functions.Action0;
+import rx.subscriptions.Subscriptions;
 
-public class NorthWest implements SensorEventListener {
+public class NorthWest {
     private final String TAG = NorthWest.class.getSimpleName();
-    private final PublishSubject<Double> subject;
     private final SensorManager sensorManager;
     private final Sensor rotationVectorSensor;
     private GeomagneticField magneticField;
@@ -24,7 +25,6 @@ public class NorthWest implements SensorEventListener {
     public NorthWest(Context context) {
         sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         rotationVectorSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
-        sensorManager.registerListener(this, rotationVectorSensor, SensorManager.SENSOR_DELAY_UI);
 
         LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
 
@@ -40,16 +40,9 @@ public class NorthWest implements SensorEventListener {
         } catch (Exception ex) {
             Log.i(TAG, "RxCompass: not calculating magnetic field declination because app has no permission for location");
         }
-
-        subject = PublishSubject.create();
     }
 
-    public void dispose() {
-        sensorManager.unregisterListener(this);
-    }
-
-    @Override
-    public void onSensorChanged(SensorEvent event) {
+    private double calculateAngle(SensorEvent event) {
         // calculate degrees to north
         float[] mRotationMatrix = new float[16];
         float[] mTruncatedRotationVector = new float[4];
@@ -74,17 +67,37 @@ public class NorthWest implements SensorEventListener {
             angle = Math.toDegrees(orientation[0]);
         }
 
-        angle = (angle + 360 ) % 360;
+        angle = (angle + 360) % 360;
 
-        // send update to observable
-        subject.onNext(angle);
+        return angle;
     }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) { }
 
 
     public Observable<Double> getObservable() {
-        return subject;
+        return Observable.create(new Observable.OnSubscribe<Double>() {
+            @Override
+            public void call(final Subscriber<? super Double> subscriber) {
+
+                final SensorEventListener sensorListener = new SensorEventListener() {
+                    @Override
+                    public void onSensorChanged(SensorEvent event) {
+                        subscriber.onNext(calculateAngle(event));
+                    }
+
+                    @Override
+                    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+                    }
+                };
+
+                subscriber.add(Subscriptions.create(new Action0() {
+                    @Override
+                    public void call() {
+                        sensorManager.unregisterListener(sensorListener);
+                    }
+                }));
+
+                sensorManager.registerListener(sensorListener, rotationVectorSensor, SensorManager.SENSOR_DELAY_UI);
+            }
+        });
     }
 }
